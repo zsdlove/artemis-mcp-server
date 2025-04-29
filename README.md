@@ -24,6 +24,4 @@ the config build.properties needs to be configured in the root directory of the 
 Example:
 java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
 build_cmd= mvn clean package -X -DskipTests=true
-java_home refers to the JDK version currently used in the project
-build_cmd refers to the project's build command
 ```
