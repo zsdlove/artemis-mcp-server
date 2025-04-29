@@ -32,7 +32,7 @@ build_cmd= mvn clean package -X -DskipTests=true
       "autoApprove": ["scan"],
       "disabled": false,
       "timeout": 60,
-      "url": "http://127.0.0.1:8082/sse",
+      "url": "http://127.0.0.1:8088/sse",
       "transportType": "sse"
 }
 ```
