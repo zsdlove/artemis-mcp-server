@@ -15,6 +15,15 @@ options:
   -r, --rule RULE      path to rule
   -s, --server SERVER  mcp server host
   -p, --port PORT      mcp server port
-示例:
+examples:
 python3 -m artemis-mcp-server -s 127.0.0.1 -p 8088
 ```
+# config
+需要在项目根目录下配置build.properties，以便于扫描器能够正常编译
+example:
+```
+java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
+build_cmd= mvn clean package -X -DskipTests=true
+```
+java_home 是项目编译所需的jdk版本
+build_cmd 是编译命令
