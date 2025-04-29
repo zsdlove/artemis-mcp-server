@@ -24,6 +24,6 @@ python3 -m artemis-mcp-server -s 127.0.0.1 -p 8088
 Example:
 java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
 build_cmd= mvn clean package -X -DskipTests=true
+java_home refers to the JDK version currently used in the project
+build_cmd refers to the project's build command
 ```
-<p>java_home 是项目编译所需的jdk版本</p>
-<p>build_cmd 是编译命令</p>
