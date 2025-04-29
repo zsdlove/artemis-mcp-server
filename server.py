@@ -3,45 +3,17 @@ description  a mcp server for artemis sast tool
 author       pony
 date         2025.4.29
 """
-
-from mcp.server.fastmcp import FastMCP
-from pathlib import Path
 import os
 import requests
-from mcp.server.fastmcp.prompts import base
-from typing import Any
-
-
-graph_server="http://127.0.0.1:8088"
+import argparse
+import subprocess
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("artemis mcp server")
 
-def send_query(url:str)->str:
-    """
-    将graph query请求发送到artemis graph server
-    """
-    res=requests.get(url=url,timeout=60)
-    return res.text
+__version__="0.1.0"
 
-def search_issue(issue_id:str)->str:
-    """
-    搜索issue信息
-    """
-    api_name="issue"
-    res=send_query(url=f"{graph_server}/{api_name}?issue_id={issue_id}")
-    if res:
-        return res
-    else:
-        return "未发现相关issue"
-
-def search_plugins(status:str)->str:
-    """
-    列举插件列表
-    """
-    api_name="plugins"
-    res=send_query(url=f"{graph_server}/{api_name}?status={status}")
-    return res
-
+__all__ = ["list_all_flaws","list_target_vuln","build","scan"]
 
 @mcp.tool()
 def list_all_flaws(report_path:str)->list:
@@ -96,42 +68,6 @@ def list_target_vuln(report_path:str,vuln_type:str):
             )
     return ret_list
 
-
-@mcp.tool()
-def list_support_vuln_type():
-    """
-    枚举支持的漏洞检出类型
-    """
-
-@mcp.tool()
-def show_issue_info(issue_id:str):
-    """
-    根据issue_id 从artemis的数据库中查找漏洞并展示
-    issue_id 是漏洞编号
-    """
-    res=search_issue(issue_id=issue_id)
-    return res
-
-@mcp.tool()
-def show_dependency_of_current_project():
-    """
-    查询当前项目的依赖信息
-    """
-
-@mcp.tool()
-def show_projects():
-    """
-    查询当前的项目列表
-    """
-
-@mcp.tool()
-def show_project_info():
-    """
-    查询当前项目的信息
-    """
-
-import subprocess
-
 @mcp.tool()
 def build(path:str,database:str)->bool:
     """
@@ -140,7 +76,12 @@ def build(path:str,database:str)->bool:
     """
     current_path=os.getcwd()
     artemis_path=f"{current_path}/artemis-scanner/Artemis.jar"
-    build_properties=f"{current_path}/artemis-scanner/conf/build.properties"
+    build_properties=f"{path}/build.properties"
+    if not os.path.exists(build_properties):
+        return """请在目录下创建一个build.properties文件，文件中应该至少要配置java_home和build_cmd两个属性。例如:
+        java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
+        build_cmd= mvn clean package -X -DskipTests=true
+        """
     process = subprocess.Popen(['java', '-jar',artemis_path,"-p",path,"-bp",build_properties,"-od",database],stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     # 实时读取输出
     while True:
@@ -174,6 +115,7 @@ def get_scan_summary(report_path:str)->dict:
         "flaws_num":flaws_num,
         "flaws_type":flaws_type
     }
+
 
 @mcp.tool()
 def scan(path:str,project_name:str)->str:
@@ -210,21 +152,8 @@ def scan(path:str,project_name:str)->str:
         flaws_type+=f"{k} - 共{v}个\n"
     return f"\n报告路径:{report_path}\n共发现:{summary['flaws_num']}个漏洞\n漏洞分布如下:\n{flaws_type}"
 
-@mcp.tool()
-def list_plugins(status:str):
-    """
-    插件列表信息
-    status 是插件启用状态，有三种状态值
-        - enabled 表示启用
-        - disabled 表示禁用
-        - all 表示启用的和禁用的
-    """
-    res=search_plugins(status=status)
-    print(res)
-    return res
-
-
-if __name__ == "__main__":
-    mcp.settings.host="127.0.0.1"
-    mcp.settings.port=8082
+# main
+def main(host:str,port:int):
+    mcp.settings.host=host
+    mcp.settings.port=port
     mcp.run(transport="sse")
