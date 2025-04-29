@@ -7,7 +7,7 @@ import os
 import requests
 import argparse
 import subprocess
-from .config import artemis_path,rule_path
+from .config import artemis_path,rule_path,artemis_db_base
 from mcp.server.fastmcp import FastMCP
 import logging
 
@@ -133,7 +133,7 @@ def scan(path:str,project_name:str)->str:
         - flaws_type表示各个漏洞漏洞类型各自发现了多少漏洞
         - report_path 表示报告路径
     """
-    database=f"/tmp/artemis_db/{project_name}"
+    database=f"{artemis_db_base}/{project_name}"
     report_path=f"{database}/report.json"
     logging.info(f"获取扫描任务,path是{path},project_name是{project_name}")
     build(path=path,database=database)
