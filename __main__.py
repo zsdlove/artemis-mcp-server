@@ -12,4 +12,4 @@ parser.add_argument('-s','--server',type=str,help='mcp server host')
 parser.add_argument('-p','--port',type=int,help='mcp server port')
 args=parser.parse_args()
 if __name__ == "__main__":
-    sys.exit(main(host=args.server,port=args.port))
+    sys.exit(main(host=args.server,port=args.port,rule=args.rule))

@@ -7,7 +7,9 @@ import os
 import requests
 import argparse
 import subprocess
+from .config import artemis_path,rule_path
 from mcp.server.fastmcp import FastMCP
+import logging
 
 mcp = FastMCP("artemis mcp server")
 
@@ -75,14 +77,17 @@ def build(path:str,database:str)->bool:
     path是待分析的源码目录
     """
     current_path=os.getcwd()
-    artemis_path=f"{current_path}/artemis-scanner/Artemis.jar"
+    print("===>"+current_path)
     build_properties=f"{path}/build.properties"
     if not os.path.exists(build_properties):
+        logging.info("没有给定build.properties文件，无法完成编译扫描")
         return """请在目录下创建一个build.properties文件，文件中应该至少要配置java_home和build_cmd两个属性。例如:
         java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
         build_cmd= mvn clean package -X -DskipTests=true
         """
-    process = subprocess.Popen(['java', '-jar',artemis_path,"-p",path,"-bp",build_properties,"-od",database],stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    build_cmd=['java', '-jar',artemis_path,"-p",path,"-bp",build_properties,"-od",database]
+    logging.info(f"构建命令是:{build_cmd}")
+    process = subprocess.Popen(build_cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     # 实时读取输出
     while True:
         output = process.stdout.readline()
@@ -130,12 +135,12 @@ def scan(path:str,project_name:str)->str:
     """
     database=f"/tmp/artemis_db/{project_name}"
     report_path=f"{database}/report.json"
+    logging.info(f"获取扫描任务,path是{path},project_name是{project_name}")
     build(path=path,database=database)
-    current_path=os.getcwd()
-    artemis_path=f"{current_path}/artemis-scanner/Artemis.jar"
-    build_properties=f"{current_path}/artemis-scanner/conf/build.properties"
-    rule_path=f"{current_path}/artemis-scanner/conf/Checker.xml"
-    process = subprocess.Popen(['java', '-jar',artemis_path,"-d",database,"-r",rule_path,"-bp",build_properties,"-o",report_path],stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    logging.info(f"构建完成，数据库路径为{database}")
+    scan_cmd=['java', '-jar',artemis_path,"-d",database,"-r",rule_path,"-o",report_path]
+    logging.info(f"扫描命令是:{scan_cmd}")
+    process = subprocess.Popen(scan_cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     # 实时读取输出
     while True:
         output = process.stdout.readline()
@@ -146,14 +151,24 @@ def scan(path:str,project_name:str)->str:
     
     # 等待进程结束
     process.wait()
+    logging.info("扫描结束")
     summary=get_scan_summary(report_path=report_path)
+    logging.info(f"以下是项目{project_name}的扫描概览信息\n{summary}")
     flaws_type=""
     for k,v in summary['flaws_type'].items():
         flaws_type+=f"{k} - 共{v}个\n"
     return f"\n报告路径:{report_path}\n共发现:{summary['flaws_num']}个漏洞\n漏洞分布如下:\n{flaws_type}"
 
 # main
-def main(host:str,port:int):
+def main(host:str,port:int,rule:str):
+    logging.info(f"启动sse服务器，监听在{host}:{port}...")
+    if rule:
+        if not os.path.exists(rule):
+            logging.error(f"规则文件{rule}不存在.")
+        else:
+            logging.info(f"设置规则路径为{rule}")
+            global rule_path
+            rule_path=rule
     mcp.settings.host=host
     mcp.settings.port=port
     mcp.run(transport="sse")
