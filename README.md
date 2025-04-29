@@ -19,11 +19,11 @@ Example:
 python3 -m artemis-mcp-server -s 127.0.0.1 -p 8088
 ```
 # config
-<p>the config build.properties needs to be configured in the root directory of the project so that the scanner can compile properly.
-<p>Example:
+<p>the config build.properties needs to be configured in the root directory of the project so that the scanner can compile properly.</p>
+<p>Example:</p>
 ```
 java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
 build_cmd= mvn clean package -X -DskipTests=true
 ```
-<p>java_home 是项目编译所需的jdk版本
-<p>build_cmd 是编译命令
+<p>java_home 是项目编译所需的jdk版本</p>
+<p>build_cmd 是编译命令</p>
