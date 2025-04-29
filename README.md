@@ -2,7 +2,7 @@
 this is a mcp server for artemis sast tool
 # usage
 ```bash
-命令行参数:
+command args:
 python3 -m artemis-mcp-server --help
 pony@ponydeMBP % python3 -m artemis-mcp-server --help
 usage: __main__.py [-h] [-v] [-r RULE] [-s SERVER] [-p PORT]
