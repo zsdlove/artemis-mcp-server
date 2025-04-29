@@ -25,3 +25,14 @@ Example:
 java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
 build_cmd= mvn clean package -X -DskipTests=true
 ```
+
+# cline config
+```json
+"artemis-mcp-server": {
+      "autoApprove": ["scan"],
+      "disabled": false,
+      "timeout": 60,
+      "url": "http://127.0.0.1:8082/sse",
+      "transportType": "sse"
+}
+```
