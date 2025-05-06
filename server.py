@@ -76,8 +76,6 @@ def build(path:str,database:str)->bool:
     根据config配置文件进行编译,生成代码语义数据库
     path是待分析的源码目录
     """
-    current_path=os.getcwd()
-    print("===>"+current_path)
     build_properties=f"{path}/build.properties"
     if not os.path.exists(build_properties):
         logging.info("没有给定build.properties文件，无法完成编译扫描")
@@ -126,11 +124,18 @@ def get_scan_summary(report_path:str)->dict:
 def scan(path:str,project_name:str)->str:
     """
     根据用户提供的路径进行源代码安全扫描，输出检出报告
-    path待分析的源码路径
-    project_name是当前的项目名，一般取当前项目的目录名
+    path 待分析的源码路径
+    project_name 是当前的项目名，一般取当前项目的目录名
+    当前工作目录下应包含build.properties这个文件，如果没有，请执行以下操作：
+        - 在当前目录下创建build.properties文件，内容格式请参考方括号中的内容:
+            [
+            java_home = /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
+            build_cmd= mvn clean package -X -DskipTests=true
+            ]
+        - 请询问用户java_home和build_cmd的值，填充到build.properties文件中。
     返回字段中
-        - flaws_num表示发现的漏洞总数，
-        - flaws_type表示各个漏洞漏洞类型各自发现了多少漏洞
+        - flaws_num 表示发现的漏洞总数，
+        - flaws_type 表示各个漏洞漏洞类型各自发现了多少漏洞
         - report_path 表示报告路径
     """
     database=f"{artemis_db_base}/{project_name}"
